@@ -1,0 +1,1174 @@
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+
+local Window = OrionLib:MakeWindow({Name = "LazyCosTrading V1.1 - By PITX", HidePremium = false, SaveConfig = true, ConfigFolder = "LazyCosTrading"})
+
+local MainTab = Window:MakeTab({
+    Name = "Main",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+local TradeSection = MainTab:AddSection({
+    Name = "Trade"
+})
+
+local tradeType = "Trading" 
+local targetUsername = "" 
+
+local function sendTradeRequest()
+    local args = {
+        [1] = tradeType,
+        [2] = targetUsername
+    }
+    game:GetService("ReplicatedStorage").Remotes.AnnounceTradeRemote:InvokeServer(unpack(args))
+end
+
+local tradeLoop = false
+local loopInterval = 1 
+
+TradeSection:AddToggle({
+    Name = "Auto Trade",
+    Default = false,
+    Callback = function(Value)
+        tradeLoop = Value
+        if tradeLoop then
+            while tradeLoop do
+                sendTradeRequest()
+                wait(loopInterval)
+            end
+        end
+    end    
+})
+
+TradeSection:AddTextbox({
+    Name = "Target Username",
+    Default = targetUsername,
+    TextDisappear = false,
+    Callback = function(Value)
+        targetUsername = Value
+        print("Target Username changed to:", targetUsername)
+    end 
+})
+
+TradeSection:AddLabel("Put the exact name of the creature") 
+
+TradeSection:AddDropdown({
+    Name = "Trade Type",
+    Default = tradeType,
+    Options = {"Trading", "TradingFor"},
+    Callback = function(Value)
+        tradeType = Value
+        print("Trade Type changed to:", tradeType)
+    end
+})
+
+
+local TextSection = MainTab:AddSection({
+    Name = "Loop Text ( 15sec recommended)"
+})
+
+local customText = "" 
+local textLoop = false
+local textLoopInterval = 15
+
+local function sendCustomText()
+    print("Sending custom text:", customText) 
+    game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(customText, "All")
+end
+
+TextSection:AddToggle({
+    Name = "Loop Text",
+    Default = false,
+    Callback = function(Value)
+        textLoop = Value
+        if textLoop then
+            while textLoop do
+                sendCustomText()
+                wait(textLoopInterval)
+            end
+        end
+    end
+})
+
+TextSection:AddTextbox({
+    Name = "Custom Text",
+    Default = customText,
+    TextDisappear = false,
+    Callback = function(Value)
+        customText = Value
+        print("Custom text changed to:", customText)
+    end
+})
+
+local options = {}
+for i = 1, 50 do
+    table.insert(options, tostring(i))
+end
+
+TextSection:AddDropdown({
+    Name = "Delay (seconds)",
+    Default = tostring(textLoopInterval), 
+    Options = options,
+    Callback = function(Value)
+        textLoopInterval = tonumber(Value)
+        print("Text loop interval changed to:", textLoopInterval)
+    end
+})
+
+
+local AutoAcceptSection = MainTab:AddSection({
+    Name = "Auto Accept Requests" 
+})
+
+local autoAcceptEnabled = false 
+
+AutoAcceptSection:AddToggle({
+    Name = "Enable Auto Accept",
+    Default = false, 
+    Callback = function(Value)
+        autoAcceptEnabled = Value
+        if autoAcceptEnabled then
+            while autoAcceptEnabled do
+                for _, player in ipairs(game.Players:GetPlayers()) do 
+                    local args = {
+                        [1] = "AcceptRequest" 
+                    }
+                    local success, errorMessage = pcall(function()
+                        player.Remotes.TradeRequestRemote:FireServer(unpack(args))
+                    end)
+
+                    if success then
+                        print("Sent trade request to " .. player.Name)
+                    else
+                        warn("Failed to send trade request to " .. player.Name .. ": " .. errorMessage)
+                    end
+                    wait(0.01) 
+                end
+            end  
+        end
+    end
+})
+
+-- FE Features Tab
+local FETab = Window:MakeTab({
+    Name = "FE Features",
+    Icon = "rbxassetid://4483345998", 
+    PremiumOnly = false
+})
+
+-- Anti-AFK Section in FE Features Tab
+local AntiAFKSection = FETab:AddSection({
+    Name = "Anti-AFK" 
+})
+
+local antiAFKEnabled = false
+
+AntiAFKSection:AddToggle({
+    Name = "Enable Anti-AFK",
+    Default = false,
+    Callback = function(Value)
+        antiAFKEnabled = Value
+        if antiAFKEnabled then
+            local VirtualInputManager = game:GetService("VirtualInputManager")
+            while antiAFKEnabled do
+                -- Simulate slight camera movements
+                VirtualInputManager:SendMouseMovementEvent(0, 1, 0, game) -- Move mouse right slightly
+                wait(15)
+                VirtualInputManager:SendMouseMovementEvent(0, -1, 0, game) -- Move mouse left slightly
+                wait(15) 
+            end
+        end
+    end
+})
+
+-- Creature List Tab
+local CreatureListTab = Window:MakeTab({
+    Name = "Creature List",
+    Icon = "rbxassetid://4483345998", 
+    PremiumOnly = false
+})
+
+local CreatureListSection = CreatureListTab:AddSection({
+    Name = "Creature Values"
+})
+
+local creatureValues = {
+    ["Akorbik"] = "1k-3k",
+
+    ["Phantejer"] = "3k-4k",
+
+    ["Nok'Tuun"] = "1.5k-2.5k",
+
+    ["Felifaux"] = "1k-1.5k",
+
+    ["Zarrax"] = "2k-3k",
+
+    ["Inkpujin"] = "5k-6k",
+
+    ["Volcanic Eruption Summon Token"] = "2.5k-3k",
+
+    ["Thunderstorm Summon Token"] = "2.5k-3k",
+
+    ["Strong Glimmer Token"] = "350",
+
+    ["Weak Glimmer Token"] = "100",
+
+    ["Random Weather Token"] = "3k-5k",
+
+    ["Random Trial Creature Token"] = "50",
+
+    ["Random Gacha Spin Token"] = "25",
+
+    ["Partial Growth Token"] = "250",
+
+    ["Partial Mission Unlock Token"] = "1.5k",
+
+    ["Mufolium"] = "12k-15k", 
+
+    ["Idrabark"] = "2k-3k",
+
+    ["Noxiouk"] = "2k-3k",
+
+    ["Revive Token"] = "500-600",
+
+    ["Max Growth Token"] = "450-500",
+
+    ["Full Mission Unlock Token"] = "2.5k-3k",
+
+    ["Blood Moon Summon Token"] = "3k",
+
+    ["Appearance Change Token"] = "100",
+
+    ["Starlit"] = "6k-9k",
+
+    ["Geortharoc"] = "12k-15k",
+
+    ["Aqoxturumox"] = "4k-5k",
+
+    ["Flipli"] = "1k-1.5k",
+
+    ["Lactarim"] = "2k-3k",
+
+    ["Firakai"] = "2.5k-3k",
+
+    ["Reeox"] = "2k-3k",
+
+    ["Galiryn"] = "10k-12k",
+
+    ["Meorlark"] = "2k-2.5k",
+
+    ["Noxulumen"] = "5k-6k",
+
+    ["Heiboktoruk"] = "2k-3k",
+
+    ["Lotremum"] = "4k-5k",
+
+    ["Irizah"] = "3k",
+
+    ["Ouratum"] = "3k-4.5k",
+
+    ["Caldonterrus"] = "28k-30k",
+
+    ["Noctla'Lune"] = "21k-25k",
+
+    ["Aidoneiscus"] = "4k-6k",
+
+    ["Bäruw"] = "4k-5k", 
+
+    ["Ushrumesh"] = "1.5k",
+
+    ["Bolatra"] = "3.5k-4k",
+
+    ["Ardor Warden"] = "4k-5k",
+
+    ["Archinax"] = "0-200",
+
+    ["Altulis"] = "1.5k-2k",
+
+    ["Archalium"] = "1.5k-2k",
+
+    ["Arachyu"] = "6k-8k",
+
+    ["Apofuex"] = "500",
+
+    ["Aolenus"] = "30k-35k",
+
+    ["Anutill"] = "1.5k",
+
+    ["Ani"] = "800-1k",
+
+    ["Angelic Warden"] = "4k-6k",
+
+    ["Alkaksu"] = "50",
+
+    ["Amolis"] = "300",
+
+    ["Aleicuda"] = "600",
+
+    ["Ahri'Tahmuk"] = "1.5k-2k",
+
+    ["Aholai"] = "0-100",
+
+    ["Aesmir"] = "500",
+
+    ["Aesho"] = "0-100",
+
+    ["Aereis"] = "30k-60k", 
+
+    ["Adharcaiin"] = "1k",
+
+    ["Asilvestrela"] = "4k",
+
+    ["Artikauk"] = "2k-2.5k",
+
+    ["Arsonos"] = "0-200",
+
+    ["Arrainoa"] = "0-100",
+
+    ["Arkmetta"] = "3k-4k",
+
+    ["Athulyth"] = "1.5k-2k",
+
+    ["Astrothi"] = "0-100",
+
+    ["Aueko"] = "500-600",
+
+    ["Avothius"] = "300-400",
+
+    ["Axothan"] = "200-500",
+
+    ["Banishii"] = "5k",
+
+    ["Bazelii"] = "5k",
+
+    ["Beezu"] = "0-100",
+
+    ["Belluvaraptor"] = "0-100",
+
+    ["Auraron"] = "1.5k-2k",
+
+    ["Bengon"] = "0-100",
+
+    ["Boreal Warden"] = "20k-25k",
+
+    ["Borenhir"] = "6k-7k",
+
+    ["Boskurro"] = "200-300",
+
+    ["Brequewk"] = "0-100",
+
+    ["Clovilowper"] = "10k-15k", 
+
+    ["Cimidstik"] = "5k",
+
+    ["Buukon"] = "0-100",
+
+    ["Coniferon"] = "4k-5k",
+
+    ["Cantapodi"] = "0-100",
+
+    ["Cavengauu"] = "500",
+
+    ["Buff Eulopii"] = "1.5k-2k",
+
+    ["Cenicara"] = "1k-1.5k",
+
+    ["Celeritas"] = "400",
+
+    ["Chamei"] = "0-100",
+
+    ["Chisudo"] = "0-200",
+
+    ["Cimmabu"] = "500-1k",
+
+    ["Corsarlett"] = "5.5k-6k",
+
+    ["Chrysos"] = "0-100",
+
+    ["Citrulantis"] = "0-100",
+
+    ["Colval"] = "1k",
+
+    ["Corvurax"] = "60k-70k",
+
+    ["Cottol"] = "0-100",
+
+    ["Crata Peretina"] = "0-200",
+
+    ["Diokrine"] = "1k-2k",
+
+    ["Cryptoth"] = "3k",
+
+    ["Cucuerpum"] = "500",
+
+    ["Cupere"] = "700", 
+
+    ["Cuxena"] = "3.5k-4k",
+
+    ["Dabaemura"] = "4k-5k",
+
+    ["Dalghara"] = "400",
+
+    ["Demetyra"] = "1.5k-2k",
+
+    ["Dantenos"] = "2k-3k",
+
+    ["Denjzi"] = "500",
+
+    ["Dunklaestus"] = "2k-3k",
+
+    ["Dieamarjla"] = "0-100",
+
+    ["Diesura"] = "0-100",
+
+    ["Doragonix"] = "0-100",
+
+    ["Dowatt"] = "500-1k",
+
+    ["Dragonixsauria"] = "0-100",
+
+    ["Dyaelatura"] = "2.5k-3k",
+
+    ["Eiroca"] = "500-1k",
+
+    ["Eigion Warden"] = "8k-12k",
+
+    ["Emphines"] = "0-100",
+
+    ["Empiterium"] = "1k-1.5k",
+
+    ["Equenix"] = "6k-7k",
+
+    ["Elarickkeir"] = "4k",
+
+    ["Erridea"] = "1k",
+
+    ["Etheralotus"] = "100k-200k",
+
+    ["Eulopii"] = "0-100", 
+
+    ["Eskarlor"] = "2k",
+
+    ["Euvias"] = "0-100",
+
+    ["Exotide"] = "1k-1.5k",
+
+    ["Exterreri"] = "0-200",
+
+    ["Fabraashe"] = "3k",
+
+    ["Faecalu"] = "500-1k",
+
+    ["Fairiocris"] = "1.5k-2k",
+
+    ["Felikxtrox"] = "2k",
+
+    ["Fellisio"] = "500",
+
+    ["Fleuralis"] = "2k",
+
+    ["Fernifly"] = "0-100",
+
+    ["Ferrah"] = "200",
+
+    ["Flamerir"] = "2k",
+
+    ["Flickaflie"] = "1k",
+
+    ["Flixlit"] = "0-300",
+
+    ["Fluren"] = "3k-4k",
+
+    ["Frigboa"] = "0-300",
+
+    ["Frigilinx"] = "2k",
+
+    ["Furnilixii"] = "3k-4k",
+
+    ["Fyluf"] = "500-1k",
+
+    ["Fyranili"] = "150",
+
+    ["Galeostra"] = "300",
+
+    ["Galtekron"] = "200-500", 
+
+    ["Garra Warden"] = "8k-10k",
+
+    ["Ghibli"] = "0-100",
+
+    ["Glimmer Aeries"] = "60k+",
+
+    ["Glimmer Ani"] = "1k-1.2k",
+
+    ["Glimmer Ardor"] = "5k-7k",
+
+    ["Glimmer Archalium"] = "2k-3k",
+
+    ["Glimmer Astrothi"] = "200-500",
+
+    ["Glimmer Auraron"] = "2k-3k",
+
+    ["Glimmer Axothan"] = "700-1k",
+
+    ["Glimmer Bazelii"] = "6k-8k",
+
+    ["Glimmer Beezu"] = "200-300",
+
+    ["Glimmer Belluvaraptor"] = "200-300",
+
+    ["Glimmer Bengon"] = "200-300",
+
+    ["Glimmer Boreal Warden"] = "25k-30k",
+
+    ["Glimmer Borenhir"] = "7k-9k",
+
+    ["Glimmer Boskurro"] = "500-800",
+
+    ["Glimmer Brequewk"] = "200-300",
+
+    ["Glimmer Buff Eulopii"] = "2k-3k",
+
+    ["Glimmer Buukon"] = "200-300",
+
+    ["Glimmer Cantapodi"] = "200-300",
+
+    ["Glimmer Cavengauu"] = "1k-1.5k",
+
+    ["Glimmer Celeritas"] = "800-1k",
+
+    ["Glimmer Chamei"] = "200-300",
+
+    ["Glimmer Chisudo"] = "400-600",
+
+    ["Glimmer Chrysos"] = "200-300",
+
+    ["Glimmer Citrulantis"] = "200-300",
+
+    ["Glimmer Clovilowper"] = "15k-20k",
+
+    ["Glimmer Colval"] = "1.5k-2k",
+
+    ["Glimmer Coniferon"] = "5k-7k",
+
+    ["Glimmer Corvurax"] = "70k+",
+
+    ["Glimmer Cottol"] = "200-300",
+
+    ["Glimmer Crata Peretina"] = "400-600",
+
+    ["Glimmer Cryptoth"] = "4k-5k",
+
+    ["Glimmer Cucuerpum"] = "1k-1.5k",
+
+    ["Glimmer Cupere"] = "1.2k-1.5k",
+
+    ["Glimmer Cuxena"] = "4k-5k",
+
+    ["Glimmer Dabaemura"] = "5k-7k",
+
+    ["Glimmer Dalghara"] = "800-1k",
+
+    ["Glimmer Dantenos"] = "3k-4k",
+
+    ["Glimmer Demetyra"] = "2k-3k",
+
+    ["Glimmer Denjzi"] = "1k-1.5k",
+
+    ["Glimmer Dieamarjla"] = "200-300",
+
+    ["Glimmer Diesura"] = "200-300",
+
+    ["Glimmer Diokrine"] = "2k-3k",
+
+    ["Glimmer Doragonix"] = "200-300",
+
+    ["Glimmer Dowatt"] = "1k-1.5k",
+
+    ["Glimmer Dragonixsauria"] = "200-300",
+
+    ["Glimmer Dyaelatura"] = "3k-4k",
+
+    ["Glimmer Eigion"] = "10k-15k",
+
+    ["Glimmer Eiroca"] = "1k-1.5k",
+
+    ["Glimmer Elarickkeir"] = "5k-7k",
+
+    ["Glimmer Emphines"] = "200-300",
+
+    ["Glimmer Empiterium"] = "1.5k-2k",
+
+    ["Glimmer Equenix"] = "7k-9k",
+
+    ["Glimmer Erridea"] = "1.5k-2k",
+
+    ["Glimmer Eskarlor"] = "3k-4k",
+
+    ["Glimmer Etheralotus"] = "150k+",
+
+    ["Glimmer Eulopii"] = "200-300",
+
+    ["Glimmer Euvias"] = "200-300",
+
+    ["Glimmer Exotide"] = "1.5k-2k",
+
+    ["Glimmer Exterreri"] = "400-600",
+
+    ["Glimmer Fabraashe"] = "4k-5k",
+
+    ["Glimmer Faecalu"] = "1k-1.5k",
+
+    ["Glimmer Fairiocris"] = "2k-3k",
+
+    ["Glimmer Felikxtrox"] = "3k-4k",
+
+    ["Glimmer Fellisio"] = "1k-1.5k",
+
+    ["Glimmer Fernifly"] = "200-300",
+
+    ["Glimmer Ferrah"] = "500-700",
+
+    ["Glimmer Firakai"] = "3k-4k",
+
+    ["Glimmer Flamerir"] = "3k-4k",
+
+    ["Glimmer Fleuralis"] = "3k-4k",
+
+    ["Glimmer Flickaflie"] = "1.5k-2k",
+
+    ["Glimmer Flixlit"] = "500-800",
+
+    ["Glimmer Fluren"] = "4k-5k",
+
+    ["Glimmer Frigboa"] = "500-800",
+
+    ["Glimmer Frigilinx"] = "3k-4k",
+
+    ["Glimmer Fyluf"] = "1k-1.5k",
+
+    ["Glimmer Fyranili"] = "400-600",
+
+    ["Glimmer Galeostra"] = "700-900",
+
+    ["Glimmer Galiryn"] = "12k-15k",
+
+    ["Glimmer Galtekron"] = "700-1k",
+
+    ["Glimmer Garra Warden"] = "10k-12k",
+
+    ["Glimmer Geortharoc"] = "15k-20k",
+
+    ["Glimmer Ghibli"] = "200-300",
+
+    ["Glimmer Gramoss"] = "4k-6k",
+
+    ["Glimmer Gryvila"] = "2k-3k",
+
+    ["Glimmer Heiboktoruk"] = "3k-4k",
+
+    ["Glimmer Hellion Warden"] = "15k-20k",
+
+    ["Glimmer Hemokai"] = "2k-3k",
+
+    ["Glimmer Hikorshi"] = "2k-3k",
+
+    ["Glimmer Hisolidium"] = "2k-3k",
+
+    ["Glimmer Hygos"] = "2k-3k",
+
+    ["Glimmer Idrabark"] = "3k-4k",
+
+    ["Glimmer Ikoran"] = "2k-3k",
+
+    ["Glimmer Illager"] = "1.5k-2k",
+
+    ["Glimmer Inkpujin"] = "7k-9k",
+
+    ["Glimmer Iridhuk"] = "3k-4k",
+
+    ["Glimmer Irizah"] = "4k-5k",
+
+    ["Glimmer Jotunhel"] = "10k-15k",
+
+    ["Glimmer Kendyll"] = "4k-6k",
+
+    ["Glimmer Keruku"] = "100k+",
+
+    ["Glimmer Khiku"] = "2k-3k",
+
+    ["Glimmer Kiara"] = "1.5k-2k",
+
+    ["Glimmer Kiiwin"] = "200-300",
+
+    ["Glimmer Koipise"] = "2k-3k",
+
+    ["Glimmer Kora Don"] = "4k-6k",
+
+    ["Glimmer Kriffin"] = "2k-3k",
+
+    ["Glimmer Kyiki"] = "2k-3k",
+
+    ["Glimmer Lactarim"] = "3k-4k",
+
+    ["Glimmer Lerachu"] = "2k-3k",
+
+    ["Glimmer Lissi"] = "2k-3k",
+
+    ["Glimmer Lissiceous"] = "2k-3k",
+
+    ["Glimmer Lotremum"] = "5k-7k",
+
+    ["Glimmer Lure"] = "2k-3k",
+
+    ["Glimmer Luxsces"] = "2k-3k",
+
+    ["Glimmer Magnarothus"] = "2k-3k",
+
+    ["Glimmer Makoura"] = "1.5k-2k",
+
+    ["Glimmer Mekmek"] = "2k-3k",
+
+    ["Glimmer Meorlark"] = "3k-4k",
+
+    ["Glimmer Militrua"] = "2k-3k",
+
+    ["Glimmer Minawii"] = "200-300",
+
+    ["Glimmer Miik"] = "2k-3k",
+
+    ["Glimmer Momola"] = "2k-3k",
+
+    ["Glimmer Moorxo"] = "1.5k-2k",
+
+    ["Glimmer Mutagon"] = "2k-3k",
+
+    ["Glimmer Nakahii"] = "2k-3k",
+
+    ["Glimmer Nephini"] = "2k-3k",
+
+    ["Glimmer Nindyr"] = "2k-3k",
+
+    ["Glimmer Noctla'Lune"] = "25k-30k",
+
+    ["Glimmer Nok'Tuun"] = "2k-3k",
+
+    ["Glimmer Novus Warden"] = "20k-25k",
+
+    ["Glimmer Noxiouk"] = "3k-4k",
+
+    ["Glimmer Noxulumen"] = "7-9k",
+
+    ["Glimmer Nyctoxon"] = "2k-3k",
+
+    ["Glimmer Oleocanth"] = "1.5k-2k",
+
+    ["Glimmer Opra"] = "1.5k-2k",
+
+    ["Glimmer Opralegion"] = "2k-3k",
+
+    ["Glimmer Ouratum"] = "4k-5k",
+
+    ["Glimmer Oxalaia"] = "2k-3k",
+
+    ["Glimmer Parahexilian"] = "2k-3k",
+
+    ["Glimmer Pernirex"] = "2k-3k",
+
+    ["Glimmer Phugu"] = "2k-3k",
+
+    ["Glimmer Polymonstrum"] = "2k-3k",
+
+    ["Glimmer Prabiki"] = "2k-3k",
+
+    ["Glimmer Puffwump"] = "200-300",
+
+    ["Glimmer Qhualhul"] = "2k-3k",
+
+    ["Glimmer Raijin"] = "1.5k-2k",
+
+    ["Glimmer Ralokai"] = "2k-3k",
+
+    ["Glimmer Reeox"] = "3k-4k",
+
+    ["Glimmer Reviiaton"] = "2k-3k",
+
+    ["Glimmer Rorolo"] = "200-300",
+
+    ["Glimmer Rukig"] = "2k-3k",
+
+    ["Glimmer Saikarie"] = "2k-3k",
+
+    ["Glimmer Salrahn"] = "4k-6k",
+
+    ["Glimmer Sana'ata"] = "2k-3k",
+
+    ["Glimmer Sang Toare"] = "2k-3k",
+
+    ["Glimmer Sar'Hingaro"] = "2k-3k",
+
+    ["Glimmer Saukuryn"] = "2k-3k",
+
+    ["Glimmer Scavitar"] = "1.5k-2k",
+
+    ["Glimmer Scimitooth"] = "1.5k-2k",
+
+    ["Glimmer Searknight"] = "2k-3k",
+
+    ["Glimmer Sha'rei"] = "2k-3k",
+
+    ["Glimmer Shiyaro"] = "2k-3k",
+
+    ["Glimmer Shro"] = "2k-3k",
+
+    ["Glimmer Sigmatox"] = "2k-3k",
+
+    ["Glimmer Sochuri"] = "2k-3k",
+
+    ["Glimmer Solstice"] = "2k-3k",
+
+    ["Glimmer Starlit"] = "8k-12k",
+
+    ["Glimmer Stegosaurus"] = "2k-3k",
+
+    ["Glimmer Syroudon"] = "2k-3k",
+
+    ["Glimmer Taeniolabis"] = "1.5k-2k",
+
+    ["Glimmer Talus"] = "1.5k-2k",
+
+    ["Glimmer Tarotta"] = "2k-3k",
+
+    ["Glimmer Taurolystris"] = "2k-3k",
+
+    ["Glimmer Ternifine"] = "2k-3k",
+
+    ["Glimmer Therokis"] = "2k-3k",
+
+    ["Glimmer Therolachus"] = "2k-3k",
+
+    ["Glimmer Tohukos"] = "2k-3k",
+
+    ["Glimmer Traiboros"] = "2k-3k",
+
+    ["Glimmer Trikylo"] = "2k-3k",
+
+    ["Glimmer Trutholbyeva"] = "2k-3k",
+
+    ["Glimmer Tundrik"] = "2k-3k",
+
+    ["Glimmer Turgeon"] = "2k-3k",
+
+    ["Glimmer Undoli"] = "2k-3k",
+
+    ["Glimmer Ura"] = "2k-3k",
+
+    ["Glimmer Ushrumesh"] = "2k-3k",
+
+    ["Glimmer Vaumora"] = "2k-3k",
+
+    ["Glimmer Veldys"] = "2k-3k",
+
+    ["Glimmer Venatrox"] = "2k-3k",
+
+    ["Glimmer Verdant Warden"] = "25k-30k",
+
+    ["Glimmer Verspera"] = "1.5k-2k",
+
+    ["Glimmer Vin'rou"] = "2k-3k",
+
+    ["Glimmer Volnoirve"] = "2k-3k",
+
+    ["Glimmer Vulpera"] = "1.5k-2k",
+
+    ["Glimmer Vulpin"] = "1.5k-2k",
+
+    ["Glimmer Warden's Rage"] = "2k-3k",
+
+    ["Glimmer Waterwarden"] = "2k-3k",
+
+    ["Glimmer Xaelobat"] = "1.5k-2k",
+
+    ["Glimmer Xeneles"] = "2k-3k",
+
+    ["Glimmer Yama'tu"] = "2k-3k",
+
+    ["Glimmer Yeba'idi"] = "2k-3k",
+
+    ["Glimmer Yggdragstyx"] = "2k-3k",
+
+    ["Glimmer Yohsog"] = "2k-3k",
+
+    ["Glimmer Zaleo"] = "1.5k-2k",
+
+    ["Glimmer Zambar"] = "1.5k-2k",
+
+    ["Glimmer Zethines"] = "2k-3k",
+
+    ["Glimmer Zoocuu"] = "2k-3k",
+
+    ["Glimmer Zwevealisk"] = "800-1.2k",
+
+    ["Glimmer Zygos"] = "1.5k-2k",
+
+    ["Gramoss"] = "3k-4k",
+
+    ["Gryvila"] = "1.5k-2k",
+
+    ["Hellion Warden"] = "12k-15k",
+
+    ["Hemokai"] = "1.5k-2k",
+
+    ["Hikorshi"] = "1.5k-2k",
+
+    ["Hisolidium"] = "1.5k-2k",
+
+    ["Hygos"] = "1.5k-2k",
+
+    ["Ikoran"] = "1.5k-2k",
+
+    ["Illager"] = "1k-1.5k",
+
+    ["Iridhuk"] = "2.5k-3k",
+
+    ["Jotunhel"] = "8k-10k",
+
+    ["Kendyll"] = "3k-4k",
+
+    ["Keruku"] = "80k-100k", 
+
+    ["Khiku"] = "1.5k-2k",
+
+    ["Kiara"] = "1k-1.5k",
+
+    ["Kiiwin"] = "0-100",
+
+    ["Koipise"] = "1.5k-2k",
+
+    ["Kora Don"] = "3k-4k",
+
+    ["Kriffin"] = "1.5k-2k",
+
+    ["Kyiki"] = "1.5k-2k",
+
+    ["Lerachu"] = "1.5k-2k",
+
+    ["Lissi"] = "1.5k-2k",
+
+    ["Lissiceous"] = "1.5k-2k",
+
+    ["Lure"] = "1.5k-2k",
+
+    ["Luxsces"] = "1.5k-2k",
+
+    ["Magnarothus"] = "1.5k-2k",
+
+    ["Makoura"] = "1k-1.5k",
+
+    ["Mekmek"] = "1.5k-2k",
+
+    ["Militrua"] = "1.5k-2k",
+
+    ["Minawii"] = "0-100",
+
+    ["Miik"] = "1.5k-2k",
+
+    ["Momola"] = "1.5k-2k",
+
+    ["Moorxo"] = "1k-1.5k",
+
+    ["Mutagon"] = "1.5k-2k",
+
+    ["Nakahii"] = "1.5k-2k",
+
+    ["Nephini"] = "1.5k-2k",
+
+    ["Nindyr"] = "1.5k-2k",
+
+    ["Novus Warden"] = "17k-20k",
+
+    ["Nyctoxon"] = "1.5k-2k",
+
+    ["Oleocanth"] = "1k-1.5k",
+
+    ["Opra"] = "1k-1.5k",
+
+    ["Opralegion"] = "1.5k-2k",
+
+    ["Oxalaia"] = "1.5k-2k",
+
+    ["Parahexilian"] = "1.5k-2k",
+
+    ["Pernirex"] = "1.5k-2k",
+
+    ["Phugu"] = "1.5k-2k",
+
+    ["Polymonstrum"] = "1.5k-2k",
+
+    ["Prabiki"] = "1.5k-2k",
+
+    ["Puffwump"] = "0-100",
+
+    ["Qhualhul"] = "1.5k-2k",
+
+    ["Raijin"] = "1k-1.5k",
+
+    ["Ralokai"] = "1.5k-2k",
+
+    ["Reviiaton"] = "1.5k-2k",
+
+    ["Rorolo"] = "0-100",
+
+    ["Rukig"] = "1.5k-2k",
+
+    ["Saikarie"] = "1.5k-2k",
+
+    ["Salrahn"] = "3k-4k",
+
+    ["Sana'ata"] = "1.5k-2k",
+
+    ["Sang Toare"] = "1.5k-2k",
+
+    ["Sar'Hingaro"] = "1.5k-2k",
+
+    ["Saukuryn"] = "1.5k-2k",
+
+    ["Scavitar"] = "1k-1.5k",
+
+    ["Scimitooth"] = "1k-1.5k",
+
+    ["Searknight"] = "1.5k-2k",
+
+    ["Sha'rei"] = "1.5k-2k",
+
+    ["Shiyaro"] = "1.5k-2k",
+
+    ["Shro"] = "1.5k-2k",
+
+    ["Sigmatox"] = "1.5k-2k",
+
+    ["Sochuri"] = "1.5k-2k",
+
+    ["Solstice"] = "1.5k-2k",
+
+    ["Stegosaurus"] = "1.5k-2k",
+
+    ["Syroudon"] = "1.5k-2k",
+
+    ["Taeniolabis"] = "1k-1.5k",
+
+    ["Talus"] = "1k-1.5k",
+
+    ["Tarotta"] = "1.5k-2k",
+
+    ["Taurolystris"] = "1.5k-2k",
+
+    ["Ternifine"] = "1.5k-2k",
+
+    ["Therokis"] = "1.5k-2k",
+
+    ["Therolachus"] = "1.5k-2k",
+
+    ["Tohukos"] = "1.5k-2k",
+
+    ["Traiboros"] = "1.5k-2k",
+
+    ["Trikylo"] = "1.5k-2k",
+
+    ["Trutholbyeva"] = "1.5k-2k",
+
+    ["Tundrik"] = "1.5k-2k",
+
+    ["Turgeon"] = "1.5k-2k",
+
+    ["Undoli"] = "1.5k-2k",
+
+    ["Ura"] = "1.5k-2k",
+
+    ["Vaumora"] = "1.5k-2k",
+
+    ["Veldys"] = "1.5k-2k",
+
+    ["Venatrox"] = "1.5k-2k",
+
+    ["Verdant Warden"] = "20k-25k",
+
+    ["Verspera"] = "1k-1.5k",
+
+    ["Vin'rou"] = "1.5k-2k",
+
+    ["Volnoirve"] = "1.5k-2k",
+
+    ["Vulpera"] = "1k-1.5k",
+
+    ["Vulpin"] = "1k-1.5k",
+
+    ["Warden's Rage"] = "1.5k-2k",
+
+    ["Waterwarden"] = "1.5k-2k",
+
+    ["Xaelobat"] = "1k-1.5k",
+
+    ["Xeneles"] = "1.5k-2k",
+
+    ["Yama'tu"] = "1.5k-2k",
+
+    ["Yeba'idi"] = "1.5k-2k",
+
+    ["Yggdragstyx"] = "1.5k-2k",
+
+    ["Yohsog"] = "1.5k-2k",
+
+    ["Zaleo"] = "1k-1.5k",
+
+    ["Zambar"] = "1k-1.5k",
+
+    ["Zethines"] = "1.5k-2k",
+
+    ["Zoocuu"] = "1.5k-2k",
+
+    ["Zygos"] = "1k-1.5k"
+}
+
+-- Function to search for creatures in the value list
+local function searchCreatures(searchText)
+    local results = {}
+    local searchTextLower = string.lower(searchText) 
+    for creatureName, value in pairs(creatureValues) do
+        local creatureNameLower = string.lower(creatureName)
+        if creatureNameLower:find(searchTextLower, 1, true) then 
+            table.insert(results, creatureName .. ": " .. value)
+        end
+    end
+    return results
+end
+
+-- Textbox for searching creatures
+CreatureListSection:AddTextbox({
+    Name = "Search Creature",
+    Default = "",
+    TextDisappear = false,
+    Callback = function(searchText)
+        -- Clear previous results
+        for _, label in ipairs(CreatureListSection:GetChildren()) do
+            if label:IsA("TextLabel") then
+                label:Destroy() 
+            end
+        end
+
+        local searchResults = searchCreatures(searchText)
+        if #searchResults == 0 then
+            CreatureListSection:AddLabel("No creatures found.")
+        else
+            for _, result in ipairs(searchResults) do
+                CreatureListSection:AddLabel(result)
+            end
+        end
+    end  
+})
+
+-- Initially display all creatures (optional)
+-- You can comment this out if you don't want to show all creatures initially
+for creatureName, value in pairs(creatureValues) do
+  CreatureListSection:AddLabel(creatureName .. ": " .. value)
+end
