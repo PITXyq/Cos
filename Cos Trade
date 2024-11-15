@@ -164,7 +164,7 @@ local AntiAFKSection = FETab:AddSection({
 local antiAFKEnabled = false
 
 AntiAFKSection:AddToggle({
-	Name = "Enable Anti-AFK",
+	Name = "Anti-AFK",
 	Default = false,
 	Callback = function(Value)
 		antiAFKEnabled = Value
