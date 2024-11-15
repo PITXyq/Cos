@@ -123,7 +123,7 @@ local AutoAcceptSection = MainTab:AddSection({
 local autoAcceptEnabled = false 
 
 AutoAcceptSection:AddToggle({
-	Name = "Enable Auto Accept",
+	Name = "Auto Accept",
 	Default = false, 
 	Callback = function(Value)
 		autoAcceptEnabled = Value
