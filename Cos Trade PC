@@ -1,0 +1,294 @@
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+
+local Window = OrionLib:MakeWindow({Name = "LazyCosTrading - By PITX", HidePremium = false, SaveConfig = true, ConfigFolder = "LazyCosTrading"})
+
+local MainTab = Window:MakeTab({
+	Name = "Main",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+-- Executor Detection
+local isSolara = is_sirhurt_closure and syn and syn.request
+
+local TradeSection = MainTab:AddSection({
+	Name = "Trade"
+})
+
+local tradeType = "Trading" 
+local targetUsername = "" 
+
+local function sendTradeRequest()
+    local args = {
+        [1] = tradeType,
+        [2] = targetUsername
+    }
+    game:GetService("ReplicatedStorage").Remotes.AnnounceTradeRemote:InvokeServer(unpack(args))
+end
+
+local tradeLoop = false
+local loopInterval = 1 
+
+TradeSection:AddToggle({
+	Name = "Auto Trade",
+	Default = false,
+	Callback = function(Value)
+		tradeLoop = Value
+		if tradeLoop then
+			while tradeLoop do
+				sendTradeRequest()
+				wait(loopInterval)
+			end
+		end
+	end    
+})
+
+TradeSection:AddTextbox({
+	Name = "Target Username",
+	Default = targetUsername,
+	TextDisappear = false,
+	Callback = function(Value)
+		targetUsername = Value
+		print("Target Username changed to:", targetUsername)
+	end	
+})
+
+TradeSection:AddLabel("Put the exact name of the creature") 
+
+TradeSection:AddDropdown({
+	Name = "Trade Type",
+	Default = tradeType,
+	Options = {"Trading", "TradingFor"},
+	Callback = function(Value)
+		tradeType = Value
+		print("Trade Type changed to:", tradeType)
+	end
+})
+
+
+local TextSection = MainTab:AddSection({
+	Name = "Loop Text ( 15sec recommended)"
+})
+
+local customText = "" 
+local textLoop = false
+local textLoopInterval = 15
+
+local function sendCustomText()
+    print("Sending custom text:", customText) 
+    game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(customText, "All")
+end
+
+TextSection:AddToggle({
+	Name = "Loop Text",
+	Default = false,
+	Callback = function(Value)
+		textLoop = Value
+		if textLoop then
+			while textLoop do
+				sendCustomText()
+				wait(textLoopInterval)
+			end
+		end
+	end
+})
+
+TextSection:AddTextbox({
+	Name = "Custom Text",
+	Default = customText,
+	TextDisappear = false,
+	Callback = function(Value)
+		customText = Value
+		print("Custom text changed to:", customText)
+	end
+})
+
+local options = {}
+for i = 1, 50 do
+	table.insert(options, tostring(i))
+end
+
+TextSection:AddDropdown({
+	Name = "Delay (seconds)",
+	Default = tostring(textLoopInterval), 
+	Options = options,
+	Callback = function(Value)
+		textLoopInterval = tonumber(Value)
+		print("Text loop interval changed to:", textLoopInterval)
+	end
+})
+
+
+local AutoAcceptSection = MainTab:AddSection({
+	Name = "Auto Accept Requests" 
+})
+
+local autoAcceptEnabled = false 
+
+AutoAcceptSection:AddToggle({
+	Name = "Enable Auto Accept",
+	Default = false, 
+	Callback = function(Value)
+		autoAcceptEnabled = Value
+		if autoAcceptEnabled then
+			while autoAcceptEnabled do
+				for _, player in ipairs(game.Players:GetPlayers()) do 
+					local args = {
+						[1] = "AcceptRequest" 
+					}
+					local success, errorMessage = pcall(function()
+						player.Remotes.TradeRequestRemote:FireServer(unpack(args))
+					end)
+
+					if success then
+						print("Sent trade request to " .. player.Name)
+					else
+						warn("Failed to send trade request to " .. player.Name .. ": " .. errorMessage)
+					end
+					wait(0.01) 
+				end
+			end  
+		end
+	end
+})
+
+-- Solara Executor Script
+if isSolara then
+    local Window = OrionLib:MakeWindow({
+        Name = "LazyCosTrading - By PITX (Solara)", 
+        HidePremium = false, 
+        SaveConfig = true, 
+        ConfigFolder = "LazyCosTradingSolara" 
+    })
+
+    local MainTab = Window:MakeTab({
+        Name = "Main",
+        Icon = "rbxassetid://4483345998",
+        PremiumOnly = false
+    })
+
+    local AutomationSection = MainTab:AddSection({
+        Name = "Automated Actions" 
+    })
+
+    local tradeType = "Trading"
+    local targetUsername = ""
+    local tradeLoop = false
+    local loopInterval = 1
+
+    local customText = ""
+    local textLoop = false
+    local textLoopInterval = 10
+
+    local function sendTradeRequest()
+        local args = { [1] = tradeType, [2] = targetUsername }
+        game:GetService("ReplicatedStorage").Remotes.AnnounceTradeRemote:InvokeServer(unpack(args))
+    end
+
+    local function sendCustomText()
+        game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(customText, "All")
+    end
+
+    AutomationSection:AddToggle({
+        Name = "Auto Trade",
+        Default = false,
+        Callback = function(Value)
+            tradeLoop = Value
+            if tradeLoop then
+                while tradeLoop do
+                    sendTradeRequest()
+                    wait(loopInterval)
+                end
+            end
+        end    
+    })
+
+    AutomationSection:AddTextbox({
+        Name = "Creature Name:", 
+        Default = targetUsername,
+        TextDisappear = false,
+        Callback = function(Value)
+            targetUsername = Value
+            print("Target Username changed to:", targetUsername)
+        end	
+    })
+
+    AutomationSection:AddDropdown({
+        Name = "Trade Type",
+        Default = tradeType,
+        Options = {"Trading", "TradingFor"},
+        Callback = function(Value)
+            tradeType = Value
+            print("Trade Type changed to:", tradeType)
+        end
+    })
+
+    AutomationSection:AddToggle({
+        Name = "Loop Text (15 recommended)",
+        Default = false,
+        Callback = function(Value)
+            textLoop = Value
+            if textLoop then
+                while textLoop do
+                    sendCustomText()
+                    wait(textLoopInterval)
+                end
+            end
+        end
+    })
+
+    AutomationSection:AddTextbox({
+        Name = "Custom Text",
+        Default = customText,
+        TextDisappear = false,
+        Callback = function(Value)
+            customText = Value
+            print("Custom text changed to:", customText)
+        end
+    })
+
+    local options = {}
+    for i = 1, 50 do
+        table.insert(options, tostring(i))
+    end
+
+    AutomationSection:AddDropdown({
+        Name = "Delay (seconds)",
+        Default = tostring(textLoopInterval), 
+        Options = options,
+        Callback = function(Value)
+            textLoopInterval = tonumber(Value)
+            print("Text loop interval changed to:", textLoopInterval)
+        end
+    })
+
+    local AutoAcceptSection = MainTab:AddSection({
+        Name = "Auto Accept Requests" 
+    })
+
+    local autoAcceptEnabled = false
+
+    AutoAcceptSection:AddToggle({
+        Name = "Enable Auto Accept",
+        Default = false, 
+        Callback = function(Value)
+            autoAcceptEnabled = Value
+            if autoAcceptEnabled then
+                while autoAcceptEnabled do
+                    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+                        local args = { [1] = "AcceptRequest" }
+                        local success, errorMessage = pcall(function()
+                            player.Remotes.TradeRequestRemote:FireServer(unpack(args))
+                        end)
+                        if success then
+                            print("Sent trade request to " .. player.Name)
+                        else
+                            warn("Failed to send trade request to " .. player.Name .. ": " .. errorMessage)
+                        end
+                        wait(0.01) 
+                    end
+                end
+            end
+        end
+    })
+end
