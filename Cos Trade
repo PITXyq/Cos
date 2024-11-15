@@ -1,6 +1,6 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
-local Window = OrionLib:MakeWindow({Name = "LazyCosTrading V1.2 - By PITX", HidePremium = false, SaveConfig = true, ConfigFolder = "LazyCosTrading"})
+local Window = OrionLib:MakeWindow({Name = "LazyCosTrading V1.3 - By PITX", HidePremium = false, SaveConfig = true, ConfigFolder = "LazyCosTrading"})
 
 local MainTab = Window:MakeTab({
 	Name = "Main",
@@ -9,7 +9,7 @@ local MainTab = Window:MakeTab({
 })
 
 local MiscTab = Window:MakeTab({
-	Name = "Miscellaneous",
+	Name = "Troll",
 	Icon = "rbxassetid://4483345998",
 	PremiumOnly = false
 })
@@ -194,7 +194,7 @@ local AutoTradeAllSection = MiscTab:AddSection({
 local autoTradeAllEnabled = false
 
 AutoTradeAllSection:AddToggle({
-	Name = "Enable Auto Trade All",
+	Name = "Auto Trade All",
 	Default = false,
 	Callback = function(Value)
 		autoTradeAllEnabled = Value
@@ -207,6 +207,42 @@ AutoTradeAllSection:AddToggle({
 							[2] = player 
 						}
 						game:GetService("Players").LocalPlayer.Remotes.TradeRequestRemote:FireServer(unpack(args))
+						wait(0.01)
+					end
+				end
+			end
+		end
+	end
+})
+
+
+local AutoDeclineSection = MiscTab:AddSection({
+	Name = "Auto Decline Trades"
+})
+
+local autoDeclineEnabled = false
+
+AutoDeclineSection:AddToggle({
+	Name = "Auto Decline",
+	Default = false,
+	Callback = function(Value)
+		autoDeclineEnabled = Value
+		if autoDeclineEnabled then
+			while autoDeclineEnabled do
+				for _, player in ipairs(game.Players:GetPlayers()) do
+					if player ~= game.Players.LocalPlayer then
+						local args = {
+							[1] = "DeclineTrade" 
+						}
+						local success, errorMessage = pcall(function()
+							game:GetService("ReplicatedStorage").Remotes:FindFirstChild("WhySoSerious0295-0Lunar_Eclipse09TradeRemote"):InvokeServer(unpack(args)) 
+						end)
+
+						if success then
+							print("Declined trade from " .. player.Name)
+						else
+							warn("Failed to decline trade from " .. player.Name .. ": " .. errorMessage)
+						end
 						wait(0.01)
 					end
 				end
