@@ -10,6 +10,7 @@ MainFrame.Size = UDim2.new(0.4, 0, 0.5, 0)
 MainFrame.Position = UDim2.new(0.3, 0, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+MainFrame.Draggable = true
 
 -- Create the title label
 local TitleLabel = Instance.new("TextLabel")
@@ -39,14 +40,14 @@ ScrollingFrame.Size = UDim2.new(0.9, 0, 0.6, 0)
 ScrollingFrame.Position = UDim2.new(0.05, 0, 0.35, 0)
 ScrollingFrame.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 ScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0) -- Will be adjusted dynamically
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 
 -- Create the minimize button
 local MinimizeButton = Instance.new("TextButton")
 MinimizeButton.Parent = MainFrame
 MinimizeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
-MinimizeButton.Position = UDim2.new(0.9, 0, 0, 0)
-MinimizeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50) -- Red color
+MinimizeButton.Position = UDim2.new(0.8, 0, 0, 0) -- Positioned to the left of MaximizeButton
+MinimizeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 MinimizeButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 MinimizeButton.Text = "-"
 MinimizeButton.Font = Enum.Font.SourceSansBold
@@ -54,26 +55,43 @@ MinimizeButton.TextSize = 24
 MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 MinimizeButton.TextScaled = true
 
--- Variable to track minimized state
-local isMinimized = false
+-- Create the maximize button
+local MaximizeButton = Instance.new("TextButton")
+MaximizeButton.Parent = ScreenGui
+MaximizeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
+MaximizeButton.Position = UDim2.new(0.9, 0, 0, 0) -- Top right corner
+MaximizeButton.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+MaximizeButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+MaximizeButton.Text = "+"
+MaximizeButton.Font = Enum.Font.SourceSansBold
+MaximizeButton.TextSize = 24
+MaximizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+MaximizeButton.TextScaled = true
+MaximizeButton.Draggable = true
+MaximizeButton.Visible = true -- Initially visible
 
--- Function to toggle minimize state
-local function toggleMinimize()
+-- Variable to track minimized state
+local isMinimized = true -- Starts minimized
+
+-- Function to toggle minimize/maximize state
+local function toggleMaximize()
     isMinimized = not isMinimized
+    MainFrame.Visible = not isMinimized
     if isMinimized then
-        MainFrame.Size = UDim2.new(0.4, 0, 0.1, 0) -- Only title bar visible
-        ScrollingFrame.Visible = false
-        SearchBox.Visible = false
-        MinimizeButton.Text = "+"
+        MaximizeButton.Text = "+"
     else
-        MainFrame.Size = UDim2.new(0.4, 0, 0.5, 0) -- Restore original size
-        ScrollingFrame.Visible = true
-        SearchBox.Visible = true
-        MinimizeButton.Text = "-"
+        MaximizeButton.Text = "-"
     end
 end
 
--- Connect the button to the toggle function
+-- Function to toggle minimize state
+local function toggleMinimize()
+    MainFrame.Visible = false
+    MaximizeButton.Visible = true
+end
+
+-- Connect the buttons to their respective toggle functions
+MaximizeButton.MouseButton1Click:Connect(toggleMaximize)
 MinimizeButton.MouseButton1Click:Connect(toggleMinimize)
 
 -- Create a list to store the result labels
@@ -467,18 +485,14 @@ local function updateResults(searchTerm)
     end
     ResultLabels = {}
 
-    -- Filter creatures based on search term
+    -- Filter creatures based on search term (case-insensitive)
     local filteredCreatures = {}
-    if searchTerm ~= "" then
-        searchTerm = string.lower(searchTerm)
-        for _, creatureData in ipairs(creatureLocations) do
-            local creatureName = string.lower(creatureData[1])
-            if string.match(creatureName, searchTerm) then
-                table.insert(filteredCreatures, creatureData)
-            end
+    searchTerm = string.lower(searchTerm) -- Convert search term to lowercase
+    for _, creatureData in ipairs(creatureLocations) do
+        local creatureName = string.lower(creatureData[1]) -- Convert creature name to lowercase
+        if string.find(creatureName, searchTerm) then
+            table.insert(filteredCreatures, creatureData)
         end
-    else
-        filteredCreatures = creatureLocations -- Show all if search is empty
     end
 
     -- Create and add result labels
