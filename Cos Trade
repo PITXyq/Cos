@@ -1,6 +1,6 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
-local Window = OrionLib:MakeWindow({Name = "LazyCosTrading V1.3 - By PITX", HidePremium = false, SaveConfig = true, ConfigFolder = "LazyCosTrading"})
+local Window = OrionLib:MakeWindow({Name = "LazyCosTrading V1.4 - By PITX", HidePremium = false, SaveConfig = true, ConfigFolder = "LazyCosTrading"})
 
 local MainTab = Window:MakeTab({
 	Name = "Main",
@@ -14,12 +14,20 @@ local MiscTab = Window:MakeTab({
 	PremiumOnly = false
 })
 
+-- New Scripts Tab
+local ScriptsTab = Window:MakeTab({
+	Name = "Scripts",
+	Icon = "rbxassetid://4483345998", 
+	PremiumOnly = false
+})
+
+-- Trade Section (Main Tab)
 local TradeSection = MainTab:AddSection({
 	Name = "Trade"
 })
 
-local tradeType = "Trading" 
-local targetUsername = "" 
+local tradeType = "Trading"
+local targetUsername = ""
 
 local function sendTradeRequest()
     local args = {
@@ -30,7 +38,7 @@ local function sendTradeRequest()
 end
 
 local tradeLoop = false
-local loopInterval = 1 
+local loopInterval = 1
 
 TradeSection:AddToggle({
 	Name = "Auto Trade",
@@ -56,7 +64,7 @@ TradeSection:AddTextbox({
 	end	
 })
 
-TradeSection:AddLabel("Put the exact name of the creature") 
+TradeSection:AddLabel("Put the exact name of the creature")
 
 TradeSection:AddDropdown({
 	Name = "Trade Type",
@@ -68,17 +76,17 @@ TradeSection:AddDropdown({
 	end
 })
 
-
+-- Loop Text Section (Main Tab)
 local TextSection = MainTab:AddSection({
-	Name = "Loop Text ( 15sec recommended)"
+	Name = "Loop Text (15sec recommended)"
 })
 
-local customText = "" 
+local customText = ""
 local textLoop = false
 local textLoopInterval = 15
 
 local function sendCustomText()
-    print("Sending custom text:", customText) 
+    print("Sending custom text:", customText)
     game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(customText, "All")
 end
 
@@ -113,7 +121,7 @@ end
 
 TextSection:AddDropdown({
 	Name = "Delay (seconds)",
-	Default = tostring(textLoopInterval), 
+	Default = tostring(textLoopInterval),
 	Options = options,
 	Callback = function(Value)
 		textLoopInterval = tonumber(Value)
@@ -121,23 +129,23 @@ TextSection:AddDropdown({
 	end
 })
 
-
+-- Auto Accept Section (Main Tab)
 local AutoAcceptSection = MainTab:AddSection({
-	Name = "Auto Accept Requests" 
+	Name = "Auto Accept Requests"
 })
 
-local autoAcceptEnabled = false 
+local autoAcceptEnabled = false
 
 AutoAcceptSection:AddToggle({
 	Name = "Auto Accept",
-	Default = false, 
+	Default = false,
 	Callback = function(Value)
 		autoAcceptEnabled = Value
 		if autoAcceptEnabled then
 			while autoAcceptEnabled do
-				for _, player in ipairs(game.Players:GetPlayers()) do 
+				for _, player in ipairs(game.Players:GetPlayers()) do
 					local args = {
-						[1] = "AcceptRequest" 
+						[1] = "AcceptRequest"
 					}
 					local success, errorMessage = pcall(function()
 						player.Remotes.TradeRequestRemote:FireServer(unpack(args))
@@ -148,23 +156,23 @@ AutoAcceptSection:AddToggle({
 					else
 						warn("Failed to send trade request to " .. player.Name .. ": " .. errorMessage)
 					end
-					wait(0.01) 
+					wait(0.01)
 				end
 			end  
 		end
 	end
 })
 
-
+-- FE Features Tab
 local FETab = Window:MakeTab({
 	Name = "FE Features",
-	Icon = "rbxassetid://4483345998", 
+	Icon = "rbxassetid://4483345998",
 	PremiumOnly = false
 })
 
-
+-- Anti-AFK Section (FE Features Tab)
 local AntiAFKSection = FETab:AddSection({
-	Name = "Anti-AFK" 
+	Name = "Anti-AFK"
 })
 
 local antiAFKEnabled = false
@@ -177,16 +185,17 @@ AntiAFKSection:AddToggle({
 		if antiAFKEnabled then
 			local VirtualInputManager = game:GetService("VirtualInputManager")
 			while antiAFKEnabled do
-				VirtualInputManager:SendMouseMovementEvent(0, 1, 0, game) 
+				VirtualInputManager:SendMouseMovementEvent(0, 1, 0, game)
 				wait(15)
 				VirtualInputManager:SendMouseMovementEvent(0, -1, 0, game)
-				wait(15) 
+				wait(15)
 			end
 		end
 	end
 })
 
 
+-- AutoTradeAll Section (Misc Tab)
 local AutoTradeAllSection = MiscTab:AddSection({
 	Name = "Auto Trade All"
 })
@@ -201,10 +210,10 @@ AutoTradeAllSection:AddToggle({
 		if autoTradeAllEnabled then
 			while autoTradeAllEnabled do
 				for _, player in ipairs(game.Players:GetPlayers()) do
-					if player ~= game.Players.LocalPlayer then 
+					if player ~= game.Players.LocalPlayer then
 						local args = {
 							[1] = "SendRequest",
-							[2] = player 
+							[2] = player
 						}
 						game:GetService("Players").LocalPlayer.Remotes.TradeRequestRemote:FireServer(unpack(args))
 						wait(0.01)
@@ -216,6 +225,7 @@ AutoTradeAllSection:AddToggle({
 })
 
 
+-- Auto Decline Section (Misc Tab)
 local AutoDeclineSection = MiscTab:AddSection({
 	Name = "Auto Decline Trades"
 })
@@ -232,10 +242,10 @@ AutoDeclineSection:AddToggle({
 				for _, player in ipairs(game.Players:GetPlayers()) do
 					if player ~= game.Players.LocalPlayer then
 						local args = {
-							[1] = "DeclineTrade" 
+							[1] = "DeclineTrade"
 						}
 						local success, errorMessage = pcall(function()
-							game:GetService("ReplicatedStorage").Remotes:FindFirstChild("WhySoSerious0295-0Lunar_Eclipse09TradeRemote"):InvokeServer(unpack(args)) 
+							game:GetService("ReplicatedStorage").Remotes:FindFirstChild("WhySoSerious0295-0Lunar_Eclipse09TradeRemote"):InvokeServer(unpack(args))
 						end)
 
 						if success then
@@ -248,5 +258,704 @@ AutoDeclineSection:AddToggle({
 				end
 			end
 		end
+	end
+})
+
+-- Calculator Script (Scripts Tab)
+local CalculatorSection = ScriptsTab:AddSection({
+	Name = "Calculator"
+})
+
+CalculatorSection:AddButton({
+	Name = "Open Calculator",
+	Callback = function()
+		-- Create a ScreenGui to hold the calculator UI
+		local ScreenGui = Instance.new("ScreenGui")
+		ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+		-- Create a Frame for the calculator
+		local CalculatorFrame = Instance.new("Frame")
+		CalculatorFrame.Name = "Calculator"
+		CalculatorFrame.Size = UDim2.new(0, 200, 0, 300)
+		CalculatorFrame.Position = UDim2.new(0.5, -100, 0.5, -150) -- Center the frame
+		CalculatorFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        CalculatorFrame.Parent = ScreenGui
+
+		-- Create a TextLabel for the display
+		local DisplayLabel = Instance.new("TextLabel")
+		DisplayLabel.Name = "Display"
+		DisplayLabel.Size = UDim2.new(1, 0, 0.2, 0)
+		DisplayLabel.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+		DisplayLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+		DisplayLabel.FontSize = Enum.FontSize.Size24
+		DisplayLabel.Text = "0"
+		DisplayLabel.TextScaled = true
+		DisplayLabel.Parent = CalculatorFrame
+
+		-- Calculator logic
+		local currentInput = ""
+		local currentResult = 0
+
+		local function updateDisplay()
+		    DisplayLabel.Text = currentInput .. " = " .. currentResult
+		end
+
+		local function performCalculation()
+		    local num1, operator, num2 = string.match(currentInput, "(%d+)([%+%-%*%/])(%d+)")
+		    if num1 and operator and num2 then
+		        num1 = tonumber(num1)
+		        num2 = tonumber(num2)
+		        if operator == "+" then
+		            currentResult = num1 + num2
+		        elseif operator == "-" then
+		            currentResult = num1 - num2
+		        elseif operator == "*" then
+		            currentResult = num1 * num2
+		        elseif operator == "/" and num2 ~= 0 then
+		            currentResult = num1 / num2
+		        end
+		        updateDisplay()
+		    end
+		end
+
+		-- Helper function to create buttons
+		local function createButton(name, position, callback)
+		    local button = Instance.new("TextButton")
+		    button.Name = name
+		    button.Size = UDim2.new(0.25, 0, 0.2, 0)
+		    button.Position = position
+		    button.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+		    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+		    button.FontSize = Enum.FontSize.Size24
+		    button.Text = name
+		    button.Parent = CalculatorFrame
+
+		    button.MouseButton1Click:Connect(callback)
+		end
+
+		-- Create number buttons
+		local buttonY = 0.2
+		for i = 1, 9 do
+		    local buttonX = (i - 1) % 3 * 0.25
+		    createButton(tostring(i), UDim2.new(buttonX, 0, buttonY, 0), function()
+		        currentInput = currentInput .. i
+		        updateDisplay()
+		    end)
+
+		    if i % 3 == 0 then
+		        buttonY = buttonY + 0.2
+		    end
+		end
+
+		-- Create operator buttons
+		createButton("+", UDim2.new(0.75, 0, 0.2, 0), function()
+		    currentInput = currentInput .. "+"
+		    updateDisplay()
+		end)
+		createButton("-", UDim2.new(0.75, 0, 0.4, 0), function()
+		    currentInput = currentInput .. "-"
+		    updateDisplay()
+		end)
+		createButton("*", UDim2.new(0.75, 0, 0.6, 0), function()
+		    currentInput = currentInput .. "*"
+		    updateDisplay()
+		end)
+		createButton("/", UDim2.new(0.75, 0, 0.8, 0), function()
+		    currentInput = currentInput .. "/"
+		    updateDisplay()
+		end)
+
+		-- Create other buttons
+		createButton("C", UDim2.new(0, 0, 0.8, 0), function() -- Clear button
+		    currentInput = ""
+		    currentResult = 0
+		    updateDisplay()
+		end)
+		createButton("0", UDim2.new(0.25, 0, 0.8, 0), function()
+		    currentInput = currentInput .. "0"
+		    updateDisplay()
+		end)
+		createButton("=", UDim2.new(0.5, 0, 0.8, 0), performCalculation) -- Equals button
+
+		-- Make the calculator draggable
+		local UserInputService = game:GetService("UserInputService")
+		local dragging = false
+		local dragInput, dragStart, startPos
+
+		CalculatorFrame.InputBegan:Connect(function(input)
+		    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		        dragging = true
+		        dragStart = input.Position
+		        startPos = CalculatorFrame.Position
+		        
+		        input.Changed:Connect(function()
+		            if input.UserInputState == Enum.UserInputState.End then
+		                dragging = false
+		            end
+		        end)
+		    end
+		end)
+
+		CalculatorFrame.InputChanged:Connect(function(input)
+		    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+		        dragInput = input
+		    end
+		end)
+
+		UserInputService.InputChanged:Connect(function(input)
+		    if input == dragInput and dragging then
+		        local delta = input.Position - dragStart
+		        CalculatorFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		    end
+		end)
+	end
+})
+
+-- Creature Prices Script (Scripts Tab)
+local CreaturePricesSection = ScriptsTab:AddSection({
+	Name = "Creature Prices"
+})
+
+CreaturePricesSection:AddButton({
+	Name = "Open Creature Prices",
+	Callback = function()
+		-- Create the screen GUI
+		local ScreenGui = Instance.new("ScreenGui")
+		ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+		-- Create the main frame
+		local MainFrame = Instance.new("Frame")
+		MainFrame.Name = "CreatureFinderFrame"
+		MainFrame.Parent = ScreenGui
+		MainFrame.Size = UDim2.new(0.4, 0, 0.5, 0)
+		MainFrame.Position = UDim2.new(0.3, 0, 0.25, 0)
+		MainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+		MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		MainFrame.Draggable = true
+
+		-- Create the title label
+		local TitleLabel = Instance.new("TextLabel")
+		TitleLabel.Parent = MainFrame
+		TitleLabel.Size = UDim2.new(1, 0, 0.1, 0)
+		TitleLabel.BackgroundTransparency = 1
+		TitleLabel.Text = "Creature Finder"
+		TitleLabel.Font = Enum.Font.SourceSansBold
+		TitleLabel.TextSize = 24
+		TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		TitleLabel.TextScaled = true
+
+		-- Create the search box
+		local SearchBox = Instance.new("TextBox")
+		SearchBox.Parent = MainFrame
+		SearchBox.Size = UDim2.new(0.9, 0, 0.1, 0)
+		SearchBox.Position = UDim2.new(0.05, 0, 0.2, 0)
+		SearchBox.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+		SearchBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		SearchBox.PlaceholderText = "Search Creature..."
+		SearchBox.TextScaled = true
+
+		-- Create the scrolling frame for results
+		local ScrollingFrame = Instance.new("ScrollingFrame")
+		ScrollingFrame.Parent = MainFrame
+		ScrollingFrame.Size = UDim2.new(0.9, 0, 0.6, 0)
+		ScrollingFrame.Position = UDim2.new(0.05, 0, 0.35, 0)
+		ScrollingFrame.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+		ScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+		-- Create the minimize button
+		local MinimizeButton = Instance.new("TextButton")
+		MinimizeButton.Parent = MainFrame
+		MinimizeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
+		MinimizeButton.Position = UDim2.new(0.8, 0, 0, 0) -- Positioned to the left of MaximizeButton
+		MinimizeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+		MinimizeButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		MinimizeButton.Text = "-"
+		MinimizeButton.Font = Enum.Font.SourceSansBold
+		MinimizeButton.TextSize = 24
+		MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		MinimizeButton.TextScaled = true
+
+		-- Create the maximize button
+		local MaximizeButton = Instance.new("TextButton")
+		MaximizeButton.Parent = ScreenGui
+		MaximizeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
+		MaximizeButton.Position = UDim2.new(0.9, 0, 0, 0) -- Top right corner
+		MaximizeButton.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+		MaximizeButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		MaximizeButton.Text = "+"
+		MaximizeButton.Font = Enum.Font.SourceSansBold
+		MaximizeButton.TextSize = 24
+		MaximizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		MaximizeButton.TextScaled = true
+		MaximizeButton.Draggable = true
+		MaximizeButton.Visible = true -- Initially visible
+
+		-- Variable to track minimized state
+		local isMinimized = true -- Starts minimized
+
+		-- Function to toggle minimize/maximize state
+		local function toggleMaximize()
+		    isMinimized = not isMinimized
+		    MainFrame.Visible = not isMinimized
+		    if isMinimized then
+		        MaximizeButton.Text = "+"
+		    else
+		        MaximizeButton.Text = "-"
+		    end
+		end
+
+		-- Function to toggle minimize state
+		local function toggleMinimize()
+		    MainFrame.Visible = false
+		    MaximizeButton.Visible = true
+		end
+
+		-- Connect the buttons to their respective toggle functions
+		MaximizeButton.MouseButton1Click:Connect(toggleMaximize)
+		MinimizeButton.MouseButton1Click:Connect(toggleMinimize)
+
+		-- Create a list to store the result labels
+		local ResultLabels = {}
+
+		-- Creature locations data (abbreviated for brevity)
+		local creatureLocations = {
+	{"Arcabatur", "10k-20k"},
+    {"Vivoltex", "2k-3k"},
+    {"Akorbik", "2k-3k"},
+    {"Phantejer", "3k-4k"}, 
+    {"Nok'Tuun", "1k-2k"}, 
+    {"Felifaux", "800-1k"},
+    {"Zarrax", "2k-3k"},
+    {"Inkpujin", "5k-6k"}, 
+    {"Volcanic Eruption Summon Token", "2.5k-3k"},
+    {"Thunderstorm Summon Token", "2.5k-3k"},
+    {"Strong Glimmer Token", "350"},
+    {"Weak Glimmer Token", "100"},
+    {"Random Weather Token", "3k-5k"},
+    {"Random Trial Creature Token", "50"},
+    {"Random Gacha Spin Token", "25"}, 
+    {"Partial Growth Token", "250"},
+    {"Partial Mission Unlock Token", "1.5k"},
+    {"Mufolium", "11k-14k"}, 
+    {"Idrabark", "2k-3k"}, 
+    {"Noxiouk", "2k-3k"}, 
+    {"Revive Token", "500-600"},
+    {"Max Growth Token", "450-500"},
+    {"Full Mission Unlock Token", "2.5k-3k"},
+    {"Blood Moon Summon Token", "3k"},
+    {"Appearance Change Token", "100"}, 
+    {"Starlit", "6k-9k"},
+    {"Geortharoc", "12k-15k"},
+    {"Aqoxturumox", "4k-5k"},
+    {"Flipli", "1k-1.5k"},
+    {"Lactarim", "2k-3k"},
+    {"Firakai", "2.5k-3k"}, 
+    {"Reeox", "2k-3k"},
+    {"Galiryn", "10k-12k"}, 
+    {"Meorlark", "2k-2.5k"}, 
+    {"Noxulumen", "5k-6k"},
+    {"Heiboktoruk", "2k-3k"},
+    {"Lotremum", "4k-5k"},
+    {"Irizah", "3k"},
+    {"Ouratum", "3k-4.5k"}, 
+    {"Caldonterrus", "28k-30k"}, 
+    {"Noctla'Lune", "21k-25k"}, 
+    {"Aidoneiscus", "4k-6k"},
+    {"Bäruw", "4k-5k"}, 
+    {"Ushrumesh", "1.5k"}, 
+    {"Bolatra", "3.5k-4k"}, 
+    {"Ardor Warden", "4k-5k"}, 
+    {"Archinax", "0-200"}, 
+    {"Altulis", "1.5k-2k"},
+    {"Archalium", "1.5k-2k"},
+    {"Arachyu", "6k-8k"}, 
+    {"Apofuex", "500"},
+    {"Aolenus", "30k-35k"}, 
+    {"Anutill", "1.5k"},
+    {"Ani", "800-1k"},
+    {"Angelic Warden", "4k-6k"}, 
+    {"Alkaksu", "50"},
+    {"Amolis", "300"},
+    {"Aleicuda", "600"}, 
+    {"Ahri'Tahmuk", "1.5k-2k"},
+    {"Aholai", "0-100"},
+    {"Aesmir", "500"},
+    {"Aesho", "0-100"},
+    {"Aereis", "30k-60k"},
+    {"Adharcaiin", "1k"},
+    {"Asilvestrela", "4k"},
+    {"Artikauk", "2k-2.5k"}, 
+    {"Arsonos", "0-200"},
+    {"Arrainoa", "0-100"},
+    {"Arkmetta", "3k-4k"},
+    {"Athulyth", "1.5k-2k"},
+    {"Astrothi", "0-100"}, 
+    {"Aueko", "500-600"}, 
+    {"Avothius", "300-400"}, 
+    {"Axothan", "200-500"}, 
+    {"Bazelii", "5k"},
+    {"Banishii", "5k"},
+    {"Beezu", "0-100"}, 
+    {"Belluvaraptor", "0-100"}, 
+    {"Auraron", "1.5k-2k"},
+    {"Bengon", "0-100"}, 
+    {"Boreal Warden", "20k-25k"}, 
+    {"Borenhir", "6k-7k"},
+    {"Boskurro", "200-300"}, 
+    {"Brequewk", "0-100"}, 
+    {"Clovilowper", "10k-15k"}, 
+    {"Cimidstik", "5k"},
+    {"Buukon", "0-100"},
+    {"Coniferon", "4k-5k"}, 
+    {"Cantapodi", "0-100"}, 
+    {"Cavengauu", "500"},
+    {"Buff Eulopii", "1.5k-2k"}, 
+    {"Cenicara", "1k-1.5k"},
+    {"Celeritas", "400"},
+    {"Chamei", "0-100"}, 
+    {"Chisudo", "0-200"}, 
+    {"Cimmabu", "500-1k"},
+    {"Corsarlett", "5.5k-6k"}, 
+    {"Chrysos", "0-100"}, 
+    {"Citrulantis", "0-100"}, 
+    {"Colval", "1k"},
+    {"Corvurax", "60k-70k"}, 
+    {"Cottol", "0-100"}, 
+    {"Crata Peretina", "0-200"}, 
+    {"Diokrine", "1k-2k"}, 
+    {"Cryptoth", "3k"},
+    {"Cucuerpum", "500"},
+    {"Cupere", "700"},
+    {"Cuxena", "3.5k-4k"}, 
+    {"Dabaemura", "4k-5k"}, 
+    {"Dalghara", "400"},
+    {"Demetyra", "1.5k-2k"}, 
+    {"Dantenos", "2k-3k"}, 
+    {"Denjzi", "500"},
+    {"Dunklaestus", "2k-3k"}, 
+    {"Dieamarjla", "0-100"}, 
+    {"Diesura", "0-100"}, 
+    {"Doragonix", "0-100"}, 
+    {"Dowatt", "500-1k"},
+    {"Dragonixsauria", "0-100"}, 
+    {"Dyaelatura", "2.5k-3k"}, 
+    {"Eiroca", "500-1k"},
+    {"Eigion Warden", "8k-12k"}, 
+    {"Emphines", "0-100"}, 
+    {"Empiterium", "1k-1.5k"}, 
+    {"Equenix", "6k-7k"},
+    {"Elarickkeir", "4k"},
+    {"Erridea", "1k"},
+    {"Etheralotus", "100k-200k"}, 
+    {"Eulopii", "0-100"}, 
+    {"Eskarlor", "2k"},
+    {"Euvias", "0-100"}, 
+    {"Exotide", "1k-1.5k"}, 
+    {"Exterreri", "0-200"}, 
+    {"Fabraashe", "3k"},
+    {"Faecalu", "500-1k"}, 
+    {"Fairiocris", "1.5k-2k"}, 
+    {"Felikxtrox", "2k"},
+    {"Fellisio", "500-1k"}, 
+    {"Fleuralis", "2k"},
+    {"Fernifly", "0-100"}, 
+    {"Ferrah", "200"},
+    {"Flamerir", "2k"},
+    {"Flickaflie", "1k"},
+    {"Flixlit", "0-300"}, 
+    {"Fluren", "3k-4k"}, 
+    {"Frigboa", "0-300"}, 
+    {"Frigilinx", "2k"},
+    {"Furnilixii", "3k-4k"}, 
+    {"Fyluf", "500-1k"}, 
+    {"Fyranili", "150"},
+    {"Galeostra", "300"},
+    {"Galtekron", "200-500"}, 
+    {"Garra Warden", "8k-10k"}, 
+    {"Geogoff", "250"},
+    {"Geoptxina", "600"},
+    {"Ghalgeya", "0-100"}, 
+    {"Ghartokus", "5k-6k"}, 
+    {"Ghibli", "1.5k"},
+    {"Gloracus", "0-100"}, 
+    {"Glovaucus", "2k"},
+    {"Gnolrock", "3k"},
+    {"Gobli", "300"},
+    {"Golgaroth", "6k-7k"}, 
+    {"Gorgonichus", "2k"},
+    {"Gramoss", "300-400"}, 
+    {"Grysallmog", "500-1k"}, 
+    {"Gurava", "300"},
+    {"Gyroudus", "2k"},
+    {"Haechionx", "1k"},
+    {"Halaqual", "1k-2k"}, 
+    {"Gryvila", "2k"},
+    {"Hebitoa", "4.5k"},
+    {"Haxaline", "300"},
+    {"Heisoteri", "3.5k"},
+    {"Hellion Warden", "10k-15k"}, 
+    {"Hemokai", "0-100"}, 
+    {"Hikorshi", "0-100"}, 
+    {"Hisolidium", "1k"},
+    {"Hushike", "0-100"}, 
+    {"Hyboria", "3k"},
+    {"Hygos", "300"},
+    {"Ibetchi", "8k-11k"}, 
+    {"Ikoran", "0-100"}, 
+    {"Imeaorn", "300"},
+    {"Imini", "800-1k"},
+    {"Irdegarde", "1k-2k"}, 
+    {"Iztajuatl", "1k-2k"}, 
+    {"Jabblebashhe", "500-1k"},
+    {"Jeff", "0-100"}, 
+    {"Jetebene", "500"},
+    {"Jhiggo Jangl", "2k"},
+    {"Jotunhel", "5k-6k"}, 
+    {"Karakro", "1k-1.5k"}, 
+    {"Kavouradis", "3k"},
+    {"Kehkmador", "0-100"}, 
+    {"Kemoti", "0-100"}, 
+    {"Kendyll", "500"},
+    {"Keruku", "90k-120k"}, 
+    {"Khetheral", "0-100"}, 
+    {"Khiku", "0-100"}, 
+    {"Kiiwin", "0-100"}, 
+    {"Kriprik", "0-100"}, 
+    {"Kiridian", "0-100"}, 
+    {"Knarliki", "0-100"}, 
+    {"Kohikii", "50-100"}, 
+    {"Koini", "6k"},
+    {"Koipoise", "0-100"}, 
+    {"Konomushi", "1.5k"},
+    {"Korathos", "500-1k"},
+    {"Koryser", "0-100"}, 
+    {"Kretsnik", "500"},
+    {"Kriffin", "0-100"}, 
+    {"Kyiki", "800-1k"}, 
+    {"Laharpes", "4.5k"},
+    {"Laibonich", "1.5k"},
+    {"Lenarabu", "1k"},
+    {"Lerachu", "100"},
+    {"Leurimess", "2k"},
+    {"Levoneh", "4k"},
+    {"Lissiceous", "0-100"}, 
+    {"Lmakosauradon", "300"},
+    {"Lorolael", "14k-15k"}, 
+    {"Lucensia", "2k"},
+    {"Lure", "500-1k"}, 
+    {"Lus-Adarch", "4k"},
+    {"Luxsces", "10k-12k"}, 
+    {"Mag'Masta", "1.5k"},
+    {"Magnacetus", "4k-5k"}, 
+    {"Magnarothus", "0-100"}, 
+    {"Maiueve", "1k"},
+    {"Megalodystrix", "2.5k"},
+    {"Mekmek", "500"},
+    {"Menace", "6k-7k"}, 
+    {"Miik", "0-100"}, 
+    {"Mijusuima", "45k-50k"}, 
+    {"Militrua", "100-200"}, 
+    {"Minawii", "0-100"}, 
+    {"Mobuushiy", "2k"},
+    {"Moemoea", "0-100"}, 
+    {"Molangai", "0-100"}, 
+    {"Moluna", "4k"},
+    {"Momola", "0-100"}, 
+    {"Moonelle", "1k-2k"}, 
+    {"Morcanix", "2k-3k"}, 
+    {"Mordelium", "1k"},
+    {"Morinus", "0-100"}, 
+    {"Muravil", "6.5k-7k"}, 
+    {"Murlk", "0-100"}, 
+    {"Nachtskinhren", "1k"},
+    {"Nakamaska", "500"},
+    {"Nimoona", "0-100"}, 
+    {"Norskogg", "1k"},
+    {"Nindyr", "0-100"}, 
+    {"Nolumoth", "1.5k"},
+    {"Nuciffracoccu", "1k"},
+    {"Nyctoxon", "1k-1.5k"}, 
+    {"Nymphasuchus", "0-100"}, 
+    {"Nytoltalus", "0-100"}, 
+    {"Nyxasolyx", "300"},
+    {"Olatua", "5k-6k"}, 
+    {"Opralegion", "2k-3k"}, 
+    {"Ovufu", "2k"},
+    {"Owa'Stryrus", "100k-170k"}, 
+    {"Oxdaizen", "300"},
+    {"Oxytalis", "3k-4k"}, 
+    {"Pacedegon", "15k"},
+    {"Parahexilian", "14k-16k"}, 
+    {"Paru-Gama", "10k-12k"}, 
+    {"Parux", "300"},
+    {"Pernirex", "0-100"}, 
+    {"Pero", "0-100"}, 
+    {"Phantaris", "7k"},
+    {"Pierry", "600-1k"},
+    {"Pliarys", "2.5k"},
+    {"Phugu", "500-700"}, 
+    {"Phyremia", "0-100"}, 
+    {"Pterolythux", "1k"},
+    {"Polymonstrum", "0-150"}, 
+    {"Prabiki", "0-100"}, 
+    {"Puffwump", "0-100"}, 
+    {"Quezekel", "2k"},
+    {"Qurugosk", "1k-1.5k"}, 
+    {"Raiquazok", "500-1k"}, 
+    {"Shararook", "500"},
+    {"Ralokai", "0-100"}, 
+    {"Reviiaton", "0-100"}, 
+    {"Ripirin", "5k-6k"}, 
+    {"Rorolo", "500-1k"}, 
+    {"Rukig", "500-1k"}, 
+    {"Saikarie", "0-100"}, 
+    {"Salrahn", "2.5k-3k"}, 
+    {"Sana'ata", "2k"},
+    {"Sang Toare", "6k-8k"}, 
+    {"Sarchias", "0-100"}, 
+    {"Saukuryn", "1k-2k"}, 
+    {"Seradae", "4k-6k"}, 
+    {"Sigmatox", "150k-200k"}, 
+    {"Sha'rei", "0-100"}, 
+    {"Shiyaro", "0-100"}, 
+    {"Shro", "0-100"}, 
+    {"Skulderouge", "30k"}, 
+    {"Slaiorn", "200"},
+    {"Sleirnok", "500-900"}, 
+    {"Sochuri", "0-100"}, 
+    {"Somnia Elus", "300k-500k"}, 
+    {"Squitico", "1k"},
+    {"Starknol", "200"},
+    {"Sturbi", "3k"},
+    {"Sylvesqual", "2k-2.5k"}, 
+    {"Syroudon", "800-1k"}, 
+    {"Taiyuelong", "12k-14k"}, 
+    {"Takamorath", "2k-4k"}, 
+    {"Tarakotu", "1.5k"},
+    {"Taurolystris", "0-100"}, 
+    {"Teinook", "1.5k"},
+    {"Therimorse", "6k"},
+    {"Therokis", "3k"},
+    {"Therolachus", "0-100"}, 
+    {"Thykallos", "300"},
+    {"Tohukos", "1.5k"},
+    {"Torcherouk", "1.5k-2k"},
+    {"Tornir", "9k-11k"}, 
+    {"Traiboros", "0-100"}, 
+    {"Trikylo", "500-1k"}, 
+    {"Trutholbyeva", "1k"},
+    {"Tsugae", "300"},
+    {"Tundrik", "1.5k-2k"}, 
+    {"Turgeon", "200"},
+    {"Uleoum", "5k-7k"}, 
+    {"Umbraxi", "4k-6k"}, 
+    {"Verdant Warden", "1k-1.3k"}, 
+    {"Verklixin", "0-100"}, 
+    {"Undoli", "1.5k-2k"}, 
+    {"Ura", "1.5k-2k"}, 
+    {"Urzuk", "3k-5k"}, 
+    {"Vahiaex", "1k"},
+    {"Valkurse", "1k"},
+    {"Valkyrie", "2k-3k"}, 
+    {"Varskela", "3k"},
+    {"Veldys", "4k-4.5k"}, 
+    {"Venatrox", "100"},
+    {"Veludorah", "200"},
+    {"Venuella", "1k"},
+    {"Vaumora", "100-300"}, 
+    {"Veraiatrice", "4k"},
+    {"Wuggawyrm", "500"},
+    {"Vorpalus", "2k-3k"}, 
+    {"Vin'rou", "0-100"}, 
+    {"Vetemortem", "0-100"}, 
+    {"Verza", "100k-150k"}, 
+    {"Viracniar", "2k-3k"}, 
+    {"Viridex", "3k"},
+    {"Voletexius", "7k"},
+    {"Volnoirve", "11.5k-13.5k"}, 
+    {"Wewuix", "500-1k"}, 
+    {"Whispthera", "5k"},
+    {"Wixpectr'o", "2k-4k"}, 
+    {"Woodralone", "4k-5k"}, 
+    {"Wystora", "0-100"}, 
+    {"Xenolif", "0-100"}, 
+    {"Xeternos", "1.5k-2k"}, 
+    {"Yama'tu", "0-100"}, 
+    {"Yeba'idi", "2.5k"},
+    {"Yenyasha", "0-100"}, 
+    {"Yggdragstyx", "1k-2k"}, 
+    {"Yiepir", "0-30"}, 
+    {"Yohsog", "7k-8k"}, 
+    {"Zeorex", "0-100"}, 
+    {"Zethines", "100-200"}, 
+    {"Zhelijin", "200-300"}, 
+    {"Zieti", "1k"},
+    {"Zohdok", "1.5k"},
+    {"Zolbatros", "1k-2k"}, 
+    {"Zoocuu", "500"},
+    {"Zwevealisk", "300-600"}
+		}
+
+		-- Function to update the results list
+		local function updateResults(searchTerm)
+		    -- Clear previous results
+		    for _, label in ipairs(ResultLabels) do
+		        label:Destroy()
+		    end
+		    ResultLabels = {}
+
+		    -- Filter creatures based on search term (case-insensitive)
+		    local filteredCreatures = {}
+		    searchTerm = string.lower(searchTerm) -- Convert search term to lowercase
+		    for _, creatureData in ipairs(creatureLocations) do
+		        local creatureName = string.lower(creatureData[1]) -- Convert creature name to lowercase
+		        if string.find(creatureName, searchTerm) then
+		            table.insert(filteredCreatures, creatureData)
+		        end
+		    end
+
+		    -- Create and add result labels
+		    local numResults = #filteredCreatures
+		    if numResults == 0 then
+		        -- Display "No creatures found" message
+		        local noResultsLabel = Instance.new("TextLabel")
+		        noResultsLabel.Parent = ScrollingFrame
+		        noResultsLabel.Size = UDim2.new(1, 0, 0.1, 0)
+		        noResultsLabel.BackgroundTransparency = 1
+		        noResultsLabel.Text = "No creatures found."
+		        noResultsLabel.Font = Enum.Font.SourceSans
+		        noResultsLabel.TextSize = 20
+		        noResultsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		        noResultsLabel.TextScaled = true
+		        table.insert(ResultLabels, noResultsLabel)
+		    else
+		        -- Display creature locations
+		        for i, creatureData in ipairs(filteredCreatures) do
+		            local resultLabel = Instance.new("TextLabel")
+		            resultLabel.Parent = ScrollingFrame
+		            resultLabel.Size = UDim2.new(1, 0, 0.1, 0)
+		            resultLabel.Position = UDim2.new(0, 0, (i - 1) * 0.1, 0)
+		            resultLabel.BackgroundTransparency = 1
+		            resultLabel.Text = creatureData[1] .. " is commonly found in: " .. creatureData[2]
+		            resultLabel.Font = Enum.Font.SourceSans
+		            resultLabel.TextSize = 20
+		            resultLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		            resultLabel.TextScaled = true
+		            table.insert(ResultLabels, resultLabel)
+		        end
+		    end
+
+		    -- Adjust canvas size based on the number of results
+		    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, numResults * 0.1)
+		end
+
+		-- Connect search box to update results
+		SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
+		    updateResults(SearchBox.Text)
+		end)
+
+		-- Initial update
+		updateResults("")
 	end
 })
