@@ -1,6 +1,6 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
-local Window = OrionLib:MakeWindow({Name = "LazyCosTrading V1.5 - By PITX", HidePremium = false, SaveConfig = true, ConfigFolder = "LazyCosTrading"})
+local Window = OrionLib:MakeWindow({Name = "LazyCosTrading V1.6 - By PITX", HidePremium = false, SaveConfig = true, ConfigFolder = "LazyCosTrading"})
 
 local MainTab = Window:MakeTab({
 	Name = "Main",
@@ -168,6 +168,27 @@ local FETab = Window:MakeTab({
 	Name = "FE Features",
 	Icon = "rbxassetid://4483345998",
 	PremiumOnly = false
+})
+
+local ServerHopSection = FETab:AddSection({
+	Name = "Server Hop"
+})
+
+ServerHopSection:AddButton({
+	Name = "Rejoin",
+	Callback = function()
+		local TeleportService = game:GetService("TeleportService")
+		local PlaceId = game.PlaceId
+		TeleportService:Teleport(PlaceId, game.Players.LocalPlayer)
+	end
+})
+
+ServerHopSection:AddButton({
+	Name = "Server Hop",
+	Callback = function()
+		local TeleportService = game:GetService("TeleportService")
+		TeleportService:TeleportToPlaceInstance(game.PlaceId, TeleportService:GetRandomPlaceInstance()) 
+	end
 })
 
 -- Anti-AFK Section (FE Features Tab)
