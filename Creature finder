@@ -41,6 +41,41 @@ ScrollingFrame.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 ScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0) -- Will be adjusted dynamically
 
+-- Create the minimize button
+local MinimizeButton = Instance.new("TextButton")
+MinimizeButton.Parent = MainFrame
+MinimizeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
+MinimizeButton.Position = UDim2.new(0.9, 0, 0, 0)
+MinimizeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50) -- Red color
+MinimizeButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+MinimizeButton.Text = "-"
+MinimizeButton.Font = Enum.Font.SourceSansBold
+MinimizeButton.TextSize = 24
+MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinimizeButton.TextScaled = true
+
+-- Variable to track minimized state
+local isMinimized = false
+
+-- Function to toggle minimize state
+local function toggleMinimize()
+    isMinimized = not isMinimized
+    if isMinimized then
+        MainFrame.Size = UDim2.new(0.4, 0, 0.1, 0) -- Only title bar visible
+        ScrollingFrame.Visible = false
+        SearchBox.Visible = false
+        MinimizeButton.Text = "+"
+    else
+        MainFrame.Size = UDim2.new(0.4, 0, 0.5, 0) -- Restore original size
+        ScrollingFrame.Visible = true
+        SearchBox.Visible = true
+        MinimizeButton.Text = "-"
+    end
+end
+
+-- Connect the button to the toggle function
+MinimizeButton.MouseButton1Click:Connect(toggleMinimize)
+
 -- Create a list to store the result labels
 local ResultLabels = {}
 
@@ -421,7 +456,7 @@ local creatureLocations = {
     {"Zolbatros", "1k-2k"}, 
     {"Zoocuu", "500"},
     {"Zwevealisk", "300-600"}
-    -- ... add more creatures and their locations
+
 }
 
 -- Function to update the results list
