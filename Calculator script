@@ -1,0 +1,139 @@
+-- Create a ScreenGui to hold the calculator UI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create a Frame for the calculator
+local CalculatorFrame = Instance.new("Frame")
+CalculatorFrame.Name = "Calculator"
+CalculatorFrame.Size = UDim2.new(0, 200, 0, 300)
+CalculatorFrame.Position = UDim2.new(0.5, -100, 0.5, -150) -- Center the frame
+CalculatorFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+CalculatorFrame.Parent = ScreenGui
+
+-- Create a TextLabel for the display
+local DisplayLabel = Instance.new("TextLabel")
+DisplayLabel.Name = "Display"
+DisplayLabel.Size = UDim2.new(1, 0, 0.2, 0)
+DisplayLabel.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+DisplayLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+DisplayLabel.FontSize = Enum.FontSize.Size24
+DisplayLabel.Text = "0"
+DisplayLabel.TextScaled = true
+DisplayLabel.Parent = CalculatorFrame
+
+-- Calculator logic
+local currentInput = ""
+local currentResult = 0
+
+local function updateDisplay()
+    DisplayLabel.Text = currentInput .. " = " .. currentResult
+end
+
+local function performCalculation()
+    local num1, operator, num2 = string.match(currentInput, "(%d+)([%+%-%*%/])(%d+)")
+    if num1 and operator and num2 then
+        num1 = tonumber(num1)
+        num2 = tonumber(num2)
+        if operator == "+" then
+            currentResult = num1 + num2
+        elseif operator == "-" then
+            currentResult = num1 - num2
+        elseif operator == "*" then
+            currentResult = num1 * num2
+        elseif operator == "/" and num2 ~= 0 then
+            currentResult = num1 / num2
+        end
+        updateDisplay()
+    end
+end
+
+-- Helper function to create buttons
+local function createButton(name, position, callback)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Size = UDim2.new(0.25, 0, 0.2, 0)
+    button.Position = position
+    button.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.FontSize = Enum.FontSize.Size24
+    button.Text = name
+    button.Parent = CalculatorFrame
+
+    button.MouseButton1Click:Connect(callback)
+end
+
+-- Create number buttons
+local buttonY = 0.2
+for i = 1, 9 do
+    local buttonX = (i - 1) % 3 * 0.25
+    createButton(tostring(i), UDim2.new(buttonX, 0, buttonY, 0), function()
+        currentInput = currentInput .. i
+        updateDisplay()
+    end)
+
+    if i % 3 == 0 then
+        buttonY = buttonY + 0.2
+    end
+end
+
+-- Create operator buttons
+createButton("+", UDim2.new(0.75, 0, 0.2, 0), function()
+    currentInput = currentInput .. "+"
+    updateDisplay()
+end)
+createButton("-", UDim2.new(0.75, 0, 0.4, 0), function()
+    currentInput = currentInput .. "-"
+    updateDisplay()
+end)
+createButton("*", UDim2.new(0.75, 0, 0.6, 0), function()
+    currentInput = currentInput .. "*"
+    updateDisplay()
+end)
+createButton("/", UDim2.new(0.75, 0, 0.8, 0), function()
+    currentInput = currentInput .. "/"
+    updateDisplay()
+end)
+
+-- Create other buttons
+createButton("C", UDim2.new(0, 0, 0.8, 0), function() -- Clear button
+    currentInput = ""
+    currentResult = 0
+    updateDisplay()
+end)
+createButton("0", UDim2.new(0.25, 0, 0.8, 0), function()
+    currentInput = currentInput .. "0"
+    updateDisplay()
+end)
+createButton("=", UDim2.new(0.5, 0, 0.8, 0), performCalculation) -- Equals button
+
+-- Make the calculator draggable
+local UserInputService = game:GetService("UserInputService")
+local dragging = false
+local dragInput, dragStart, startPos
+
+CalculatorFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = CalculatorFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+CalculatorFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        CalculatorFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
