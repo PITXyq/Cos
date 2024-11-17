@@ -1,6 +1,6 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
-local Window = OrionLib:MakeWindow({Name = "LazyCosTrading V1.7 - By PITX", HidePremium = false, SaveConfig = true, ConfigFolder = "LazyCosTrading"})
+local Window = OrionLib:MakeWindow({Name = "LazyCosTrading V1.8 - By PITX", HidePremium = false, SaveConfig = true, ConfigFolder = "LazyCosTrading"})
 
 local MainTab = Window:MakeTab({
 	Name = "Main",
@@ -140,6 +140,64 @@ TradeSection:AddTextbox({
 	end	
 })
 
+local TradeSection = MainTab:AddSection({
+	Name = "Auto Trade Shoom" 
+})
+TradeSection:AddLabel("Only works if someone trades you")
+
+local tradeCurrencyLoop = false 
+local tradeCurrencyLoopInterval = 0.01 
+local tradeCurrencyName = "Shooms" 
+local tradeCurrencyAmount = 100 
+
+TradeSection:AddToggle({
+	Name = "Enable Auto Trade Currency", 
+	Default = false,
+	Callback = function(Value)
+		tradeCurrencyLoop = Value
+		if tradeCurrencyLoop then
+			while tradeCurrencyLoop do
+				local localPlayerName = game.Players.LocalPlayer.Name
+				local randomPlayer = game.Players:GetPlayers()[math.random(1, #game.Players:GetPlayers())] 
+				
+				-- No random switching of names here
+
+				local args = {
+					[1] = "AddTradeItem",
+					[2] = {
+						["Overwrite"] = true,
+						["Name"] = tradeCurrencyName, 
+						["ItemType"] = "Currency", 
+						["Amount"] = tradeCurrencyAmount
+					}
+				}
+				local success, errorMessage = pcall(function()
+					game:GetService("ReplicatedStorage").Remotes:FindFirstChild(randomPlayer.Name .. "-" .. localPlayerName .. "TradeRemote"):InvokeServer(unpack(args)) 
+				end)
+
+				if success then
+					print("Sent trade currency to " .. randomPlayer.Name)
+				else
+					warn("Failed to send trade currency to " .. randomPlayer.Name .. ": " .. errorMessage)
+				end
+
+				wait(tradeCurrencyLoopInterval) 
+			end
+		end
+	end    
+})
+
+-- Removed the textbox for Currency Name
+
+TradeSection:AddTextbox({
+	Name = "Amount",
+	Default = tostring(tradeCurrencyAmount), 
+	TextDisappear = false,
+	Callback = function(Value)
+		tradeCurrencyAmount = tonumber(Value) or 1 
+		print("Amount changed to:", tradeCurrencyAmount)
+	end	
+})
 
 -- Loop Text Section (Main Tab)
 local TextSection = MainTab:AddSection({
