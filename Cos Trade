@@ -86,7 +86,7 @@ local tradeItemName = ""
 local tradeItemAmount = 1 
 
 TradeSection:AddToggle({
-	Name = "Enable Auto Trade Item",
+	Name = "Enable Auto Trade Creature",
 	Default = false,
 	Callback = function(Value)
 		tradeItemLoop = Value
