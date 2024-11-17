@@ -1,6 +1,6 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
-local Window = OrionLib:MakeWindow({Name = "LazyCosTrading V1.6 - By PITX", HidePremium = false, SaveConfig = true, ConfigFolder = "LazyCosTrading"})
+local Window = OrionLib:MakeWindow({Name = "LazyCosTrading V1.7 - By PITX", HidePremium = false, SaveConfig = true, ConfigFolder = "LazyCosTrading"})
 
 local MainTab = Window:MakeTab({
 	Name = "Main",
@@ -75,6 +75,70 @@ TradeSection:AddDropdown({
 		print("Trade Type changed to:", tradeType)
 	end
 })
+
+local TradeSection = MainTab:AddSection({
+	Name = "Auto Trade Creature" 
+})
+
+local tradeItemLoop = false 
+local tradeItemLoopInterval = 0.01 
+local tradeItemName = "" 
+local tradeItemAmount = 1 
+
+TradeSection:AddToggle({
+	Name = "Enable Auto Trade Item",
+	Default = false,
+	Callback = function(Value)
+		tradeItemLoop = Value
+		if tradeItemLoop then
+			while tradeItemLoop do
+				local localPlayerName = game.Players.LocalPlayer.Name
+				local randomPlayer = game.Players:GetPlayers()[math.random(1, #game.Players:GetPlayers())] 
+				local args = {
+					[1] = "AddTradeItem",
+					[2] = {
+						["Overwrite"] = true,
+						["Name"] = tradeItemName, 
+						["ItemType"] = "Creatures",
+						["Amount"] = tradeItemAmount
+					}
+				}
+				local success, errorMessage = pcall(function()
+					game:GetService("ReplicatedStorage").Remotes:FindFirstChild(randomPlayer.Name .. "-" .. localPlayerName .. "TradeRemote"):InvokeServer(unpack(args))
+				end)
+
+				if success then
+					print("Sent trade item to " .. randomPlayer.Name)
+				else
+					warn("Failed to send trade item to " .. randomPlayer.Name .. ": " .. errorMessage)
+				end
+
+				wait(tradeItemLoopInterval) 
+			end
+		end
+	end    
+})
+
+TradeSection:AddTextbox({
+	Name = "Creature Name",
+	Default = tradeItemName, 
+	TextDisappear = false,
+	Callback = function(Value)
+		tradeItemName = Value
+		print("Creature name changed to:", tradeItemName)
+	end	
+})
+
+TradeSection:AddTextbox({
+	Name = "Amount",
+	Default = tostring(tradeItemAmount), 
+	TextDisappear = false,
+	Callback = function(Value)
+		tradeItemAmount = tonumber(Value) or 1 
+		print("Amount changed to:", tradeItemAmount)
+	end	
+})
+
 
 -- Loop Text Section (Main Tab)
 local TextSection = MainTab:AddSection({
