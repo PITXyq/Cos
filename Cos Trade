@@ -118,6 +118,7 @@ TradeSection:AddToggle({
 		end
 	end    
 })
+TradeSection:AddLabel("Only works if someone trades you")
 
 TradeSection:AddTextbox({
 	Name = "Creature Name",
